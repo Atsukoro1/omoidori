@@ -1,4 +1,3 @@
-// src/commands/reminders/create.ts
 import type { Message } from 'discord.js';
 import { db } from '../../lib/prisma';
 import * as chrono from 'chrono-node';

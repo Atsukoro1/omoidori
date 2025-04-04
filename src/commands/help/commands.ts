@@ -1,4 +1,3 @@
-// src/commands/help/commands.ts
 import type { Message } from "discord.js";
 import { commands } from "../index";
 

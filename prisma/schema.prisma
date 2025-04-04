@@ -30,3 +30,12 @@ model Reminder {
   status    String   @default("pending") // pending/completed/failed
   retries   Int      @default(0)
 }
+
+model Note {
+  id        String   @id @default(uuid())
+  content   String
+  userId    String
+  tags      String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
