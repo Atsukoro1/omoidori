@@ -2,6 +2,8 @@ import { Client, GatewayIntentBits } from "discord.js";
 import "dotenv/config";
 import { aiProcess } from "./lib/ai";
 import { handleCommand } from "./commands";
+import { discordClient } from "./lib/discordClient";
+import { startReminderCron } from "./lib/scheduler";
 
 const { DISCORD_TOKEN, OWNER_USER_ID } = process.env;
 
@@ -9,15 +11,13 @@ if (!DISCORD_TOKEN || !OWNER_USER_ID) {
   throw new Error("Missing required environment variables");
 }
 
-const client = new Client({
-  intents: [GatewayIntentBits.DirectMessages, GatewayIntentBits.MessageContent],
-});
+discordClient.on("ready", async () => {
+  console.log(`🌸 ${discordClient.user?.tag} is ready!`);
 
-client.on("ready", async () => {
-  console.log(`🌸 ${client.user?.tag} is ready!`);
+  startReminderCron();
 
   try {
-    const user = await client.users.fetch(OWNER_USER_ID);
+    const user = await discordClient.users.fetch(OWNER_USER_ID);
     await user.createDM();
     console.log(`Pre-created DM channel with ${user.tag}`);
   } catch (error) {
@@ -25,7 +25,7 @@ client.on("ready", async () => {
   }
 });
 
-client.on("messageCreate", async (message) => {
+discordClient.on("messageCreate", async (message) => {
   if (!message.channel.isDMBased() || message.author.bot) return;
 
   // Try to handle as command first
@@ -43,4 +43,4 @@ client.on("messageCreate", async (message) => {
   }
 });
 
-client.login(process.env.DISCORD_TOKEN);
+discordClient.login(process.env.DISCORD_TOKEN);
