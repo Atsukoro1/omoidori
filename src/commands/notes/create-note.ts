@@ -3,6 +3,8 @@ import { openrouter } from "../../lib/openrouter";
 import type { Message } from "discord.js";
 import { db } from "../../lib/prisma";
 
+export const description = "Creates a permanent note with a content. Usage: !create-note My password to bank account: 1234";
+
 export async function execute(message: Message, args: string[]) {
   if (!args.length) {
     return message.reply("Please include your note content!\nExample: `!note Buy more cat food`");

@@ -1,6 +1,8 @@
 import type { Message } from "discord.js";
 import { db } from "../../lib/prisma";
 
+export const description = "Lists all created notes including their IDs to further delete them.";
+
 export async function execute(message: Message) {
 	const notes = await db.note.findMany({
 		where: { userId: message.author.id },
