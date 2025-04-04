@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+model MessageHistory {
+  id          String   @id @default(uuid())
+  content     String
+  createdAt   DateTime @default(now())
+  isBot       Boolean  @default(false)
+  context     Boolean  @default(true)
+}
+
+model ContextSummary {
+  id        String   @id @default(uuid())
+  summary   String
+  createdAt DateTime @default(now())
+}
