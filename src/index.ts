@@ -28,14 +28,18 @@ discordClient.on("ready", async () => {
 discordClient.on("messageCreate", async (message) => {
   if (!message.channel.isDMBased() || message.author.bot) return;
 
-  // Try to handle as command first
   const isCommand = handleCommand(message);
   if (isCommand) return;
 
-  // Otherwise process as normal message
   try {
     await message.channel.sendTyping();
-    const response = await aiProcess(message.content);
+
+    const response = await aiProcess({
+        prompt: message.content,
+        includeMessageHistory: true,
+        includeTools: true,
+    });
+
     await message.reply(response);
   } catch (error) {
     console.error("Message handling failed:", error);

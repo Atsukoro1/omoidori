@@ -16,10 +16,9 @@ export function startReminderCron() {
 
 		for (const reminder of dueReminders) {
 			try {
-				const user = await discordClient.users.fetch(reminder.userId);
+				const user = await discordClient.users.fetch(process.env.OWNER_USER_ID as string);
 				const dmChannel = user.dmChannel || (await user.createDM());
 
-				// Generate AI-style message
 				const message = await generateReminderMessage(reminder.content);
 
 				await dmChannel.send(message);

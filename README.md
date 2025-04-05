@@ -12,6 +12,7 @@ TODOs:
     - [] Apple healthkit (to my apple watch) - too hard probs won't do this
     - [] Discord status (if user logs on after long time - it will welcome him to spark up conversation)
 - [] Program to detect desktop activity **very time consuming idea probs wont do** - also would need web server in order to work
+- [] Caching of some things in order to save money on prooompting :3
 
 VIBE CODING AT IT'S FINEST
 This project is made with DeepSeek, just had a quick *ADHD moment* idea and really had to make it reality :D

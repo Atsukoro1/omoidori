@@ -25,7 +25,6 @@ model Reminder {
   id        String   @id @default(uuid())
   content   String
   dueAt     DateTime
-  userId    String   // For future expansion
   createdAt DateTime @default(now())
   status    String   @default("pending") // pending/completed/failed
   retries   Int      @default(0)
