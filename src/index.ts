@@ -2,11 +2,10 @@ import "dotenv/config";
 import { aiProcess } from "./lib/ai";
 import { handleCommand } from "./commands";
 import { discordClient } from "./lib/discordClient";
-import { startReminderCron } from "./lib/scheduler";
+import { env } from "./lib/env";
+import { startReminderCron } from "./crons/reminderCron";
 
-const { DISCORD_TOKEN, OWNER_USER_ID } = process.env;
-
-if (!DISCORD_TOKEN || !OWNER_USER_ID) {
+if (!env.DISCORD_TOKEN || !env.OWNER_USER_ID) {
   throw new Error("Missing required environment variables");
 }
 
@@ -16,7 +15,7 @@ discordClient.on("ready", async () => {
   startReminderCron();
 
   try {
-    const user = await discordClient.users.fetch(OWNER_USER_ID);
+    const user = await discordClient.users.fetch(env.OWNER_USER_ID);
     await user.createDM();
     console.log(`Pre-created DM channel with ${user.tag}`);
   } catch (error) {
@@ -46,4 +45,4 @@ discordClient.on("messageCreate", async (message) => {
   }
 });
 
-discordClient.login(process.env.DISCORD_TOKEN);
+discordClient.login(env.DISCORD_TOKEN);

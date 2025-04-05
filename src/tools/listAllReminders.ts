@@ -1,17 +1,13 @@
 import { z } from "zod";
 import { db } from "../lib/prisma";
 
-const listAllRemindersSchema = z.object({});
-
 export const listAllRemindersTool = {
 	description: "Lists all un-reminded reminders",
-	parameters: listAllRemindersSchema,
+	parameters: z.object({}),
 	execute: async () => {
 		const reminders = await db.reminder.findMany({
 			where: {
-				status: {
-					not: "complete",
-				},
+				status: "pending",
 			},
 			select: {
 				content: true,
@@ -19,11 +15,14 @@ export const listAllRemindersTool = {
 			},
 		});
 
-		return reminders
-			.map(
-				(reminder) =>
-					`${reminder.content} due to ${reminder.dueAt.toLocaleString()}`,
-			)
-			.join("\n");
+		return {
+			success: true,
+			result: reminders
+				.map(
+					(reminder) =>
+						`${reminder.content} due to \`${reminder.dueAt.toLocaleString()}\``,
+				)
+				.join("\n"),
+		};
 	},
 };

@@ -11,7 +11,7 @@ export const deleteAllRemindersTool = {
 
         return {
             success: true,
-            remindersDeleted: remindersDeleted.count
+            result: `Deleted ${remindersDeleted} reminders... :3`
         };
     }
 }

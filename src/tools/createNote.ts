@@ -22,8 +22,7 @@ export const createNoteTool = {
 
         return {
             success: true,
-            noteId: note.id,
-            content: note.content
+            result: null,
         }
     }
 };

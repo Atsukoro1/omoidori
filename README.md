@@ -1,4 +1,4 @@
-OMOIDORI
+Project OMOIDORI (思い 取り)
 Virtual AI assistant through Discord
 
 TODOs:
@@ -6,7 +6,7 @@ TODOs:
 - [x] Virtual calendar - reminders via cronjobs
 - [x] Therapist-like approach
 - [x] Remember things about user (context)
-- [] Function calling instead of command usage
+- [x] Function calling instead of command usage
 - [] User activity awareness (only ideas)
     - [] Wakatime api
     - [] Apple healthkit (to my apple watch) - too hard probs won't do this

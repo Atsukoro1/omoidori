@@ -21,7 +21,7 @@ export const createReminderTool = {
 			throw new Error("Invalid time format or past date");
 		}
 
-		const reminder = await db.reminder.create({
+		await db.reminder.create({
 			data: {
 				content: args.content,
 				dueAt: parsedDate,
@@ -30,8 +30,7 @@ export const createReminderTool = {
 
 		return {
 			success: true,
-			reminderId: reminder.id,
-			dueAt: parsedDate.toISOString(),
+			result: null
 		};
 	},
 };
