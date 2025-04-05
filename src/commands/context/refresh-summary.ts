@@ -1,6 +1,6 @@
 import type { Message } from "discord.js";
-import { checkForSummary } from "../../lib/memory";
 import { db } from "../../lib/prisma";
+import { checkForSummary } from "../../utils/checkForSummary";
 
 export const description =
 	"Force-regenerates the context summary from recent messages";

@@ -17,11 +17,9 @@ export async function execute(message: Message, args: string[]) {
 	const noteIdFragment = args[0];
 
 	try {
-		// Find the note (partial ID match)
 		const note = await db.note.findFirst({
 			where: {
 				id: { startsWith: noteIdFragment },
-				userId: message.author.id,
 			},
 		});
 
@@ -31,7 +29,6 @@ export async function execute(message: Message, args: string[]) {
 			);
 		}
 
-		// Generate AI confirmation
 		const { text: aiResponse } = await generateText({
 			model: openrouter("anthropic/claude-3-haiku"),
 			system: `You're Omoidori. Confirm note deletion with personality. Rules:

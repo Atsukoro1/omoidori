@@ -5,7 +5,6 @@ export const description = "Lists all created notes including their IDs to furth
 
 export async function execute(message: Message) {
 	const notes = await db.note.findMany({
-		where: { userId: message.author.id },
 		orderBy: { createdAt: "desc" },
 		take: 5,
 	});

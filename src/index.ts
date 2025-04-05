@@ -1,4 +1,3 @@
-import { Client, GatewayIntentBits } from "discord.js";
 import "dotenv/config";
 import { aiProcess } from "./lib/ai";
 import { handleCommand } from "./commands";

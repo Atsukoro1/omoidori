@@ -1,41 +1,17 @@
+import { openrouter } from "../lib/openrouter";
+import { MODELS } from "../consts/models";
+import { db } from "../lib/prisma";
 import { generateText } from "ai";
-import { db } from "./prisma";
-import { openrouter } from "./openrouter";
 
-const MAX_CONTEXT = 20;
 const SUMMARY_INTERVAL = 15; // Messages between automatic summaries
-const CHEAP_MODEL = "mistralai/mistral-7b-instruct";
-
-export async function getContextMessages() {
-	const messages = await db.messageHistory.findMany({
-		where: { context: true },
-		orderBy: { createdAt: "asc" },
-		take: MAX_CONTEXT,
-	});
-
-	// Rotate oldest message out of context
-	if (messages.length >= MAX_CONTEXT) {
-		const oldest = messages[0];
-		await db.messageHistory.update({
-			where: { id: oldest?.id },
-			data: { context: false },
-		});
-	}
-
-	return messages.map((m) => ({
-		role: m.isBot ? "assistant" : ("user" as const),
-		content: m.content,
-	}));
-}
 
 export async function checkForSummary(force = false) {
 	const messageCount = await db.messageHistory.count();
 
-	// Run if forced or at interval
 	if (force || (messageCount > 0 && messageCount % SUMMARY_INTERVAL === 0)) {
 		const lastMessages = await db.messageHistory.findMany({
 			orderBy: { createdAt: "desc" },
-			take: force ? Math.min(messageCount, 30) : SUMMARY_INTERVAL, // Allow more messages for forced updates
+			take: force ? Math.min(messageCount, 30) : SUMMARY_INTERVAL,
 		});
 
 		const conversation = lastMessages
@@ -43,7 +19,6 @@ export async function checkForSummary(force = false) {
 			.map((m) => `${m.isBot ? "Assistant" : "User"}: ${m.content}`)
 			.join("\n");
 
-		// Get or create the single summary
 		const existingSummary = await db.contextSummary.findFirst();
 
 		const summaryPrompt = [
@@ -61,19 +36,18 @@ export async function checkForSummary(force = false) {
 		].join("\n");
 
 		const { text: updatedSummary } = await generateText({
-			model: openrouter(CHEAP_MODEL),
+			model: openrouter(MODELS.summary),
 			prompt: summaryPrompt,
 			maxTokens: 300,
 			temperature: 0.3,
 		});
 
-		// Upsert the single summary record
 		if (existingSummary) {
 			await db.contextSummary.update({
 				where: { id: existingSummary.id },
 				data: {
 					summary: updatedSummary,
-					createdAt: new Date(), // Refresh timestamp
+					createdAt: new Date(),
 				},
 			});
 		} else {
@@ -82,15 +56,7 @@ export async function checkForSummary(force = false) {
 			});
 		}
 
-		return updatedSummary; // Return for manual refresh commands
+		return updatedSummary; 
 	}
 	return null;
-}
-
-export async function saveMessage(content: string, isBot: boolean) {
-	const message = await db.messageHistory.create({
-		data: { content, isBot },
-	});
-	await checkForSummary(); // Automatic checks
-	return message;
 }

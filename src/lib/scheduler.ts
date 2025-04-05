@@ -1,11 +1,11 @@
 import cron from "node-cron";
 import { db } from "./prisma";
-import { generateReminderMessage } from "./reminders";
 import { discordClient } from "./discordClient";
+import { generateReminderMessage } from "../utils/generateReminderMessage";
 
 export function startReminderCron() {
+	// Every minute
 	cron.schedule("* * * * *", async () => {
-		// Every minute
 		const dueReminders = await db.reminder.findMany({
 			where: {
 				dueAt: { lte: new Date() },
