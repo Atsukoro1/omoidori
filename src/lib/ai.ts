@@ -51,7 +51,7 @@ export async function aiProcess({
 				list_all_reminders: listAllRemindersTool,
 				create_note: createNoteTool,
 				list_all_notes: listAllNotesTool,
-				delete_note: deleteNoteTool
+				delete_note: deleteNoteTool,
 			},
 		}),
 	});

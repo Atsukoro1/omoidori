@@ -4,7 +4,7 @@ import { discordClient } from "../lib/discordClient";
 import { generateReminderMessage } from "../utils/generateReminderMessage";
 import { env } from "../lib/env";
 
-export function startReminderCron() {
+export const startReminderCron = () => {
     // Every minute
     cron.schedule("* * * * *", async () => {
         const dueReminders = await db.reminder.findMany({
