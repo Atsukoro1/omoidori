@@ -42,6 +42,7 @@ discordClient.on("messageCreate", async (message) => {
         prompt: message.content,
         includeTools: true,
         useMemory: true,
+        includeMessages: true
     });
 
     await message.reply(response);

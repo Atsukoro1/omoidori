@@ -1,6 +1,6 @@
 import { env } from "../lib/env";
 import { qdrant } from "../lib/qdrantDb";
-import { getEmbedding } from "../utils/getEmbedding";
+import { getEmbedding } from "./getEmbedding";
 
 export const storeEmbeddingText = async (text: string) => {
   const embedding = await getEmbedding(text);

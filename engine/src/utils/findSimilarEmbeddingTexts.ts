@@ -1,7 +1,7 @@
 import { env } from "../lib/env";
 import { logger } from "../lib/logger";
 import { qdrant } from "../lib/qdrantDb";
-import { getEmbedding } from "../utils/getEmbedding";
+import { getEmbedding } from "./getEmbedding";
 
 export const findSimilarEmbeddingTexts = async (
   query: string,

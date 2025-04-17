@@ -13,13 +13,15 @@ import { listAllNotesTool } from "../tools/listAllNotes";
 import { deleteNoteTool } from "../tools/deleteNote";
 import { logger } from "./logger";
 import { initVectorDb } from "./qdrantDb";
-import { storeEmbeddingText } from "../tools/storeEmbeddingText";
-import { findSimilarEmbeddingTexts } from "../tools/findSimilarEmbeddingTexts";
+import { storeEmbeddingText } from "../utils/storeEmbeddingText";
+import { findSimilarEmbeddingTexts } from "../utils/findSimilarEmbeddingTexts";
+import { getContextMessages } from "../utils/getContextMessages";
 
 interface AiProcessProps {
   prompt: string;
   includeTools?: boolean;
   useMemory?: boolean;
+  includeMessages?: boolean;
 }
 
 await initVectorDb();
@@ -28,17 +30,33 @@ export async function aiProcess({
   prompt,
   includeTools,
   useMemory = true,
+  includeMessages = false,
 }: AiProcessProps) {
-  const contextSummary = await db.contextSummary.findFirst({
-    orderBy: { createdAt: "desc" },
-  });
+  const [contextSummary, rawMessages] = await Promise.all([
+    db.contextSummary.findFirst({ orderBy: { createdAt: "desc" } }),
+    getContextMessages(),
+  ]);
 
+  /**
+   * Known messages from Qdrant (vector DB) that are similar to what user said now
+   */
   let memorySection = "";
   if (useMemory) {
     const memories = await findSimilarEmbeddingTexts(prompt, 5);
     memorySection = memories.length > 0
       ? `MEMORY CONTEXT:\n${memories.map(m => `- ${m.text}`).join('\n')}`
       : '';
+  }
+
+  /**
+   * Latest messages from postgres database (only few of them)
+   */
+  let messages: CoreMessage[] = [];
+  if (includeMessages) {
+    messages = rawMessages.length === 0 ? [] : rawMessages.map(message => ({
+      role: "user",
+      content: message.content
+    }));
   }
 
   const systemPrompt = [
@@ -51,7 +69,7 @@ export async function aiProcess({
     model: openrouter(MODELS.chat_tooling),
     system: systemPrompt,
     temperature: 0.7,
-    messages: [{ role: "user", content: prompt }],
+    messages: [{ role: "user", content: prompt, ...messages }],
     ...(includeTools && {
       tools: {
         create_reminder: createReminderTool,
@@ -69,10 +87,11 @@ export async function aiProcess({
   logger.info({ response: responseText }, "The bot responded with");
 
   if (useMemory) {
-    await Promise.all([
-      storeEmbeddingText(`USER INPUT: ${prompt}`),
-      storeEmbeddingText(`AI RESPONSE: ${responseText}`)
-    ]).catch((e) => logger.error(e, "Failed to store memories"));
+    try {
+      await storeEmbeddingText(prompt);
+    } catch (e) {
+      logger.error(e, "Failed to store memories")
+    };
   }
 
   await saveMessage(responseText, true);
