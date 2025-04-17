@@ -11,8 +11,10 @@ import { MODELS } from "../consts/models";
 import { saveMessage } from "../utils/saveMessage";
 import { listAllNotesTool } from "../tools/listAllNotes";
 import { deleteNoteTool } from "../tools/deleteNote";
-import { initVectorDb, storeText, findSimilarTexts } from "../lib/embeddings";
 import { logger } from "./logger";
+import { initVectorDb } from "./qdrantDb";
+import { storeEmbeddingText } from "../tools/storeEmbeddingText";
+import { findSimilarEmbeddingTexts } from "../tools/findSimilarEmbeddingTexts";
 
 interface AiProcessProps {
   prompt: string;
@@ -33,7 +35,7 @@ export async function aiProcess({
 
   let memorySection = "";
   if (useMemory) {
-    const memories = await findSimilarTexts(prompt, 3);
+    const memories = await findSimilarEmbeddingTexts(prompt, 5);
     memorySection = memories.length > 0
       ? `MEMORY CONTEXT:\n${memories.map(m => `- ${m.text}`).join('\n')}`
       : '';
@@ -68,8 +70,8 @@ export async function aiProcess({
 
   if (useMemory) {
     await Promise.all([
-      storeText(`USER INPUT: ${prompt}`),
-      storeText(`AI RESPONSE: ${responseText}`)
+      storeEmbeddingText(`USER INPUT: ${prompt}`),
+      storeEmbeddingText(`AI RESPONSE: ${responseText}`)
     ]).catch((e) => logger.error(e, "Failed to store memories"));
   }
 
