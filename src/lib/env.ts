@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { logger } from "./logger";
 
 const envSchema = z.object({
-    // Database related
+    // Postgres database related
     POSTGRES_USER: z.string(),
     POSTGRES_PASSWORD: z.string(),
     POSTGRES_DB: z.string(),
@@ -18,15 +19,16 @@ const envSchema = z.object({
 
     // Node process
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+
+    // Qdrant database
+    QDRANT_URL: z.string().url(),
+    QDRANT_COLLECTION_NAME: z.string(),
 });
 
 const envParseResult = envSchema.safeParse(process.env);
 
 if (!envParseResult.success) {
-  console.error(
-    "❌ Invalid environment variables:",
-    envParseResult.error.flatten().fieldErrors
-  );
+  logger.fatal(envParseResult.error.flatten().fieldErrors, "Invalid environment variables");
   process.exit(1);
 }
 

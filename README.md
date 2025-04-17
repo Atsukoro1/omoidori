@@ -13,6 +13,10 @@ TODOs:
     - [] Discord status (if user logs on after long time - it will welcome him to spark up conversation)
 - [] Program to detect desktop activity **very time consuming idea probs wont do** - also would need web server in order to work
 - [] Caching of some things in order to save money on prooompting :3
+- [x] Vector database for message saving
+- [] Rabbit MQ instead of cron set to minute to deliver perfectly timed messages
+- [x] Logging to be perfectly aware of what's happening inside (in case it fails - for debugging)
+- [] usage of MCP instead of classic tooling? :3
 
 VIBE CODING AT IT'S FINEST
 This project is made with DeepSeek, just had a quick *ADHD moment* idea and really had to make it reality :D

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Message } from "discord.js";
+import { logger } from "../lib/logger";
 
 type Command = {
   name: string;
@@ -39,7 +40,6 @@ export function handleCommand(message: Message) {
 
   if (!commandName) return false;
 
-  // Handle help command specifically
   if (commandName === 'help') {
     const helpCommand = commands.find(cmd => cmd.name === 'help:commands');
     if (helpCommand) {
@@ -48,7 +48,6 @@ export function handleCommand(message: Message) {
     return true;
   }
 
-  // Find command
   const command = commands.find(cmd => 
     cmd.name === commandName.replace(':', ':') || 
     cmd.name.endsWith(`:${commandName}`)
@@ -60,7 +59,7 @@ export function handleCommand(message: Message) {
     command.execute(message, args);
     return true;
   } catch (error) {
-    console.error(`Error executing command ${commandName}:`, error);
+    logger.error({ error, commandName }, "Error executing command");
     return false;
   }
 }

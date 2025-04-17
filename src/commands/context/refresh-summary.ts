@@ -1,6 +1,7 @@
 import type { Message } from "discord.js";
 import { db } from "../../lib/prisma";
 import { checkForSummary } from "../../utils/checkForSummary";
+import { logger } from "../../lib/logger";
 
 export const description =
 	"Force-regenerates the context summary from recent messages";
@@ -21,7 +22,7 @@ export async function execute(message: Message) {
 			`Summary refreshed successfully! Here's the current version:\n\n${currentSummary.summary}\n\nI'll keep updating it automatically as we chat!`,
 		);
 	} catch (error) {
-		console.error("Summary refresh failed:", error);
+		logger.error(error, "Summary refresh failed");
 		await message.reply(
 			"Failed to refresh summary... maybe try again later? (´；ω；`)",
 		);

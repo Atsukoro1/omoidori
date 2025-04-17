@@ -1,3 +1,4 @@
+import { logger } from "../../lib/logger";
 import { db } from "../../lib/prisma";
 import type { Message } from "discord.js";
 
@@ -7,7 +8,7 @@ export async function execute(message: Message) {
   try {
     const summaries = await db.contextSummary.findMany({
       orderBy: { createdAt: "desc" },
-      take: 10 // Last 10 summaries
+      take: 10
     });
 
     if (summaries.length === 0) {
@@ -20,7 +21,7 @@ export async function execute(message: Message) {
 
     return message.reply(`Here are your context summaries:\n\n${summaryText}`);
   } catch (error) {
-    console.error("Failed to fetch summaries:", error);
+    logger.error(error, "Failed to fetch summaries");
     return message.reply("Failed to get summaries. Sorry! (´；ω；`)");
   }
 }

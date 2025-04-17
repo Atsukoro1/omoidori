@@ -1,5 +1,6 @@
 import type { Message } from "discord.js";
 import { commands } from "../index";
+import { logger } from "../../lib/logger";
 
 export async function execute(message: Message) {
     try {
@@ -28,7 +29,7 @@ export async function execute(message: Message) {
 
         await message.reply(response);
     } catch (error) {
-        console.error("Failed to list commands:", error);
+        logger.error(error, "Failed to list commands");
         await message.reply("Oops! Couldn't fetch my command list (´；ω；`)");
     }
 }

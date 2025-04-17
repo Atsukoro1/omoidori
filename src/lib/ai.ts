@@ -12,6 +12,7 @@ import { saveMessage } from "../utils/saveMessage";
 import { listAllNotesTool } from "../tools/listAllNotes";
 import { deleteNoteTool } from "../tools/deleteNote";
 import { initVectorDb, storeText, findSimilarTexts } from "../lib/embeddings";
+import { logger } from "./logger";
 
 interface AiProcessProps {
   prompt: string;
@@ -26,31 +27,29 @@ export async function aiProcess({
   includeTools,
   useMemory = true,
 }: AiProcessProps) {
-  const contextSummary = await db.contextSummary.findFirst({ orderBy: { createdAt: "desc" } });
+  const contextSummary = await db.contextSummary.findFirst({
+    orderBy: { createdAt: "desc" },
+  });
 
-  const relevantMemories = useMemory 
-    ? await findSimilarTexts(prompt, 3)
-    : [];
-
-  const memoryContext = relevantMemories.length > 0
-    ? `Relevant Memories:\n${relevantMemories.map(m => `- ${m.text} (${m.score.toFixed(2)})`).join('\n')}`
-    : '';
+  let memorySection = "";
+  if (useMemory) {
+    const memories = await findSimilarTexts(prompt, 3);
+    memorySection = memories.length > 0
+      ? `MEMORY CONTEXT:\n${memories.map(m => `- ${m.text}`).join('\n')}`
+      : '';
+  }
 
   const systemPrompt = [
     createSystemPrompt(defaultContext),
-    memoryContext,
-    contextSummary?.summary ? `User Context:\n${contextSummary.summary}` : "",
+    memorySection,
+    contextSummary?.summary ? `USER CONTEXT:\n${contextSummary.summary}` : "",
   ].filter(Boolean).join("\n\n");
-
-  let responseText = "";
 
   const { text, toolResults } = await generateText({
     model: openrouter(MODELS.chat_tooling),
     system: systemPrompt,
     temperature: 0.7,
-    messages: [
-      { role: "user", content: prompt },
-    ],
+    messages: [{ role: "user", content: prompt }],
     ...(includeTools && {
       tools: {
         create_reminder: createReminderTool,
@@ -63,16 +62,17 @@ export async function aiProcess({
     }),
   });
 
-  responseText = `${text}${toolResults[0] ? "\n\n".concat(toolResults[0]?.result.result ?? "") : ""}`;
+  const responseText = `${text}${toolResults[0] ? "\n\n".concat(toolResults[0]?.result.result ?? "") : ""}`;
+
+  logger.info({ response: responseText }, "The bot responded with");
 
   if (useMemory) {
     await Promise.all([
-      storeText(prompt),
-      storeText(responseText)
-    ]).catch(e => console.error("Failed to store memories:", e));
+      storeText(`USER INPUT: ${prompt}`),
+      storeText(`AI RESPONSE: ${responseText}`)
+    ]).catch((e) => logger.error(e, "Failed to store memories"));
   }
 
   await saveMessage(responseText, true);
-
   return responseText;
 }

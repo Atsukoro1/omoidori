@@ -3,5 +3,6 @@
  */
 export const MODELS = {
     "summary": "mistralai/mistral-7b-instruct",
-    "chat_tooling": "anthropic/claude-3.7-sonnet"
+    "chat_tooling": "anthropic/claude-3.7-sonnet",
+    "embeddings": "Xenova/all-MiniLM-L6-v2"
 } as const;
