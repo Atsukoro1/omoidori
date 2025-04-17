@@ -3,7 +3,7 @@ import { MODELS } from "../consts/models";
 import { db } from "../lib/prisma";
 import { generateText } from "ai";
 
-const SUMMARY_INTERVAL = 15; // Messages between automatic summaries
+const SUMMARY_INTERVAL = 40; // Messages between automatic summaries
 
 export async function checkForSummary(force = false) {
 	const messageCount = await db.messageHistory.count();

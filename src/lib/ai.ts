@@ -8,57 +8,71 @@ import { createNoteTool } from "../tools/createNote";
 import { createSystemPrompt } from "../utils/createSystemPrompt";
 import { defaultContext } from "../consts/context";
 import { MODELS } from "../consts/models";
-import { getContextMessages } from "../utils/getContextMessages";
 import { saveMessage } from "../utils/saveMessage";
 import { listAllNotesTool } from "../tools/listAllNotes";
 import { deleteNoteTool } from "../tools/deleteNote";
+import { initVectorDb, storeText, findSimilarTexts } from "../lib/embeddings";
 
 interface AiProcessProps {
-	prompt: string;
-	includeMessageHistory?: boolean;
-	includeTools?: boolean;
+  prompt: string;
+  includeTools?: boolean;
+  useMemory?: boolean;
 }
 
+await initVectorDb();
+
 export async function aiProcess({
-	prompt,
-	includeMessageHistory,
-	includeTools,
+  prompt,
+  includeTools,
+  useMemory = true,
 }: AiProcessProps) {
-	const [contextSummary, messages] = await Promise.all([
-		db.contextSummary.findFirst({ orderBy: { createdAt: "desc" } }),
-		getContextMessages(),
-	]);
+  const contextSummary = await db.contextSummary.findFirst({ orderBy: { createdAt: "desc" } });
 
-	const systemPrompt = [
-		createSystemPrompt(defaultContext),
-		contextSummary?.summary ? `User Context:\n${contextSummary.summary}` : "",
-	].join("\n\n");
+  const relevantMemories = useMemory 
+    ? await findSimilarTexts(prompt, 3)
+    : [];
 
-	let responseText = "";
+  const memoryContext = relevantMemories.length > 0
+    ? `Relevant Memories:\n${relevantMemories.map(m => `- ${m.text} (${m.score.toFixed(2)})`).join('\n')}`
+    : '';
 
-	const { text, toolResults } = await generateText({
-		model: openrouter(MODELS.chat_tooling),
-		system: systemPrompt,
-		temperature: 0.7,
-		messages: [
-			...(includeMessageHistory ? (messages as CoreMessage[]) : []),
-			{ role: "user", content: prompt },
-		],
-		...(includeTools && {
-			tools: {
-				create_reminder: createReminderTool,
-				delete_all_reminders: deleteAllRemindersTool,
-				list_all_reminders: listAllRemindersTool,
-				create_note: createNoteTool,
-				list_all_notes: listAllNotesTool,
-				delete_note: deleteNoteTool,
-			},
-		}),
-	});
+  const systemPrompt = [
+    createSystemPrompt(defaultContext),
+    memoryContext,
+    contextSummary?.summary ? `User Context:\n${contextSummary.summary}` : "",
+  ].filter(Boolean).join("\n\n");
 
-	responseText = `${text}${toolResults[0] ? "\n\n".concat(toolResults[0]?.result.result ?? "") : ""} `;
+  let responseText = "";
 
-	await saveMessage(responseText, true);
+  const { text, toolResults } = await generateText({
+    model: openrouter(MODELS.chat_tooling),
+    system: systemPrompt,
+    temperature: 0.7,
+    messages: [
+      { role: "user", content: prompt },
+    ],
+    ...(includeTools && {
+      tools: {
+        create_reminder: createReminderTool,
+        delete_all_reminders: deleteAllRemindersTool,
+        list_all_reminders: listAllRemindersTool,
+        create_note: createNoteTool,
+        list_all_notes: listAllNotesTool,
+        delete_note: deleteNoteTool,
+      },
+    }),
+  });
 
-	return responseText;
+  responseText = `${text}${toolResults[0] ? "\n\n".concat(toolResults[0]?.result.result ?? "") : ""}`;
+
+  if (useMemory) {
+    await Promise.all([
+      storeText(prompt),
+      storeText(responseText)
+    ]).catch(e => console.error("Failed to store memories:", e));
+  }
+
+  await saveMessage(responseText, true);
+
+  return responseText;
 }

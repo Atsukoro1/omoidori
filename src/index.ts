@@ -34,8 +34,8 @@ discordClient.on("messageCreate", async (message) => {
 
     const response = await aiProcess({
         prompt: message.content,
-        includeMessageHistory: true,
         includeTools: true,
+        useMemory: true,
     });
 
     await message.reply(response);
