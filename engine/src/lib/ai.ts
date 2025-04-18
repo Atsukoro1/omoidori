@@ -54,7 +54,7 @@ export async function aiProcess({
   let messages: CoreMessage[] = [];
   if (includeMessages) {
     messages = rawMessages.length === 0 ? [] : rawMessages.map(message => ({
-      role: "user",
+      role: message.role as 'user' | 'assistant',
       content: message.content
     }));
   }
@@ -69,7 +69,7 @@ export async function aiProcess({
     model: openrouter(MODELS.chat_tooling),
     system: systemPrompt,
     temperature: 0.7,
-    messages: [{ role: "user", content: prompt, ...messages }],
+    messages: [{ ...messages, role: "user", content: prompt }],
     ...(includeTools && {
       tools: {
         create_reminder: createReminderTool,
@@ -82,7 +82,7 @@ export async function aiProcess({
     }),
   });
 
-  const responseText = `${text}${toolResults[0] ? "\n\n".concat(toolResults[0]?.result.result ?? "") : ""}`;
+  const responseText = `${text}${toolResults[0] ? " ".concat(toolResults[0]?.result.result ?? "") : ""}`;
 
   logger.info({ response: responseText }, "The bot responded with");
 
@@ -95,5 +95,7 @@ export async function aiProcess({
   }
 
   await saveMessage(responseText, true);
+  await saveMessage(prompt, false);
+
   return responseText;
 }

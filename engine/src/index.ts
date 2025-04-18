@@ -1,55 +1,36 @@
 import "dotenv/config";
-import { aiProcess } from "./lib/ai";
-import { handleCommand } from "./commands";
-import { discordClient } from "./lib/discordClient";
-import { env } from "./lib/env";
-import { startReminderCron } from "./crons/reminderCron";
+import { websocketServer } from "./lib/websocketServer";
 import { logger } from "./lib/logger";
+import { aiProcess } from "./lib/ai";
+import { startReminderCron } from "./crons/reminderCron";
+import type WebSocket from "ws";
 
-if (!env.DISCORD_TOKEN || !env.OWNER_USER_ID) {
-  throw new Error("Missing required environment variables");
-}
+export let socket: WebSocket | null = null;
 
-discordClient.on("ready", async () => {
-  logger.info({
-    tag: discordClient?.user?.tag
-  }, "Discord client is ready");
+websocketServer.on("connection", (ws) => {  
+  logger.info("New connection estabilished on websocket");
 
+  socket = ws;
   startReminderCron();
 
-  try {
-    const user = await discordClient.users.fetch(env.OWNER_USER_ID);
-    await user.createDM();
+  ws.on("error", (error) => logger.error(error, "Error happened on websocket"));
 
-    logger.info({ targetUser: user?.tag }, "Pre-created DM channel with user");
-  } catch (error) {
-    logger.error(error, "Failed to pre-create DM channel with target user");
-  }
-});
+  ws.on("message", async function message(content) {
+    const messageContent = content.toString();
 
-discordClient.on("messageCreate", async (message) => {
-  if (!message.channel.isDMBased() || message.author.bot) return;
+    logger.info({ content: messageContent }, "Incoming message from user");
 
-  logger.info({ content: message.content, fromUser: message.author.tag }, "Incoming message from user");
-
-  const isCommand = handleCommand(message);
-  if (isCommand) return;
-
-  try {
-    await message.channel.sendTyping();
-
-    const response = await aiProcess({
-        prompt: message.content,
+    try {
+      const response = await aiProcess({
+        prompt: messageContent,
         includeTools: true,
         useMemory: true,
-        includeMessages: true
-    });
+        includeMessages: true,
+      });
 
-    await message.reply(response);
-  } catch (error) {
-    logger.error(error, "Message handling failed");
-    await message.reply("H-hiccup! My circuits glitched... (⁄ ⁄>⁄ ▽ ⁄<⁄ ⁄)");
-  }
+      ws.send(response);
+    } catch (error) {
+      logger.error(error, "Message handling failed");
+    }
+  });
 });
-
-discordClient.login(env.DISCORD_TOKEN);

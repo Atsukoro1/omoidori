@@ -1,11 +1,12 @@
 import cron from "node-cron";
 import { db } from "../lib/prisma";
-import { discordClient } from "../lib/discordClient";
 import { generateReminderMessage } from "../utils/generateReminderMessage";
-import { env } from "../lib/env";
+import { socket } from "..";
+import { logger } from "../lib/logger";
 
 export const startReminderCron = () => {
-    // Every minute
+    logger.info("Scheduled reminder cron for every minute!");
+
     cron.schedule("* * * * *", async () => {
         const dueReminders = await db.reminder.findMany({
             where: {
@@ -17,12 +18,9 @@ export const startReminderCron = () => {
 
         for (const reminder of dueReminders) {
             try {
-                const user = await discordClient.users.fetch(env.OWNER_USER_ID as string);
-                const dmChannel = user.dmChannel || (await user.createDM());
-
                 const message = await generateReminderMessage(reminder.content);
 
-                await dmChannel.send(message);
+                socket?.send(message);
                 await db.reminder.update({
                     where: { id: reminder.id },
                     data: { status: "completed" },

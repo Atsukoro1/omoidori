@@ -7,10 +7,6 @@ const envSchema = z.object({
     POSTGRES_PASSWORD: z.string(),
     POSTGRES_DB: z.string(),
     POSTGRES_URL: z.string(),
-    
-    // Discord bot related
-    DISCORD_TOKEN: z.string(),
-    OWNER_USER_ID: z.string(),
 
     // Openrouter
     OPENROUTER_API_KEY: z.string().startsWith("sk-or-v1-", {
@@ -23,6 +19,10 @@ const envSchema = z.object({
     // Qdrant database
     QDRANT_URL: z.string().url(),
     QDRANT_COLLECTION_NAME: z.string(),
+
+    // Websocket configuration
+    WEBSOCKET_PORT: z.string(),
+    WEBSOCKET_HOST: z.string(),
 });
 
 const envParseResult = envSchema.safeParse(process.env);

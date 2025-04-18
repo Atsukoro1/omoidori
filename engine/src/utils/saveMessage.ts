@@ -6,7 +6,7 @@ export async function saveMessage(content: string, isBot: boolean) {
 		data: { content, isBot },
 	});
 
-	await checkForSummary(); // Automatic checks for summaries
+	await checkForSummary();
 
 	return message;
 }

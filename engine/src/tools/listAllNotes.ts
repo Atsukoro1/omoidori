@@ -14,9 +14,7 @@ export const listAllNotesTool = {
 
         return {
             success: true,
-            result: notes.map(note => {
-                return `\`${note.id}\` - ${note.content}`
-            }).join("\n"),
+            result: `Your notes are: ${notes.map(note => note.content).join(", ")}`,
         }
     }
 };
