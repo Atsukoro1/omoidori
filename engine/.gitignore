@@ -35,3 +35,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # Qdrant 
 qdrant_data
+
+# Data folder temporary storage for audio
+data

@@ -1,36 +1,34 @@
 import { generateText, type CoreMessage } from "ai";
 import { db } from "./prisma";
 import { openrouter } from "./openrouter";
-import { createReminderTool } from "../tools/createReminder";
-import { deleteAllRemindersTool } from "../tools/deleteAllReminders";
-import { listAllRemindersTool } from "../tools/listAllReminders";
-import { createNoteTool } from "../tools/createNote";
 import { createSystemPrompt } from "../utils/createSystemPrompt";
 import { defaultContext } from "../consts/context";
 import { MODELS } from "../consts/models";
 import { saveMessage } from "../utils/saveMessage";
-import { listAllNotesTool } from "../tools/listAllNotes";
-import { deleteNoteTool } from "../tools/deleteNote";
 import { logger } from "./logger";
 import { initVectorDb } from "./qdrantDb";
 import { storeEmbeddingText } from "../utils/storeEmbeddingText";
 import { findSimilarEmbeddingTexts } from "../utils/findSimilarEmbeddingTexts";
 import { getContextMessages } from "../utils/getContextMessages";
+import { generateAudio } from "../utils/generateAudio";
+import { socket } from "..";
+import { env } from "./env";
 
 interface AiProcessProps {
   prompt: string;
-  includeTools?: boolean;
   useMemory?: boolean;
   includeMessages?: boolean;
+  sendMetadata?: boolean;
+  useVoiceGeneration?: boolean;
 }
 
 await initVectorDb();
 
 export async function aiProcess({
   prompt,
-  includeTools,
   useMemory = true,
   includeMessages = false,
+  useVoiceGeneration = false,
 }: AiProcessProps) {
   const [contextSummary, rawMessages] = await Promise.all([
     db.contextSummary.findFirst({ orderBy: { createdAt: "desc" } }),
@@ -65,26 +63,14 @@ export async function aiProcess({
     contextSummary?.summary ? `USER CONTEXT:\n${contextSummary.summary}` : "",
   ].filter(Boolean).join("\n\n");
 
-  const { text, toolResults } = await generateText({
+  const { text } = await generateText({
     model: openrouter(MODELS.chat_tooling),
     system: systemPrompt,
     temperature: 0.7,
     messages: [{ ...messages, role: "user", content: prompt }],
-    ...(includeTools && {
-      tools: {
-        create_reminder: createReminderTool,
-        delete_all_reminders: deleteAllRemindersTool,
-        list_all_reminders: listAllRemindersTool,
-        create_note: createNoteTool,
-        list_all_notes: listAllNotesTool,
-        delete_note: deleteNoteTool,
-      },
-    }),
   });
 
-  const responseText = `${text}${toolResults[0] ? " ".concat(toolResults[0]?.result.result ?? "") : ""}`;
-
-  logger.info({ response: responseText }, "The bot responded with");
+  logger.info({ response: text }, "The bot responded with");
 
   if (useMemory) {
     try {
@@ -94,8 +80,19 @@ export async function aiProcess({
     };
   }
 
-  await saveMessage(responseText, true);
+  if (useVoiceGeneration) {
+    await generateAudio(text);
+    
+    const socketResponse: SocketResponse = {
+      type: 'new_audio',
+      data: `http://localhost:${env.HTTP_SERVER_PORT}/audio/latest.mp3`
+    };
+
+    socket?.send(JSON.stringify(socketResponse));
+  }
+
+  await saveMessage(text, true);
   await saveMessage(prompt, false);
 
-  return responseText;
+  return text;
 }
