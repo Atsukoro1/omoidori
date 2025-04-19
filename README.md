@@ -6,6 +6,7 @@ TODOs in short time:
 
 - [x] Therapist-like approach
 - [x] Remember things about user (context)
+- [] Better handling of long time memories with vector DB
 - [] User activity awareness (only ideas)
     - [] Wakatime api
     - [] Apple healthkit (to my apple watch) - too hard probs won't do this
@@ -31,3 +32,13 @@ This project is made with DeepSeek, just had a quick *ADHD moment* idea and real
 please don't look into the code, I'm retarded
 -- Edit - It's not quick ADHD idea anymore, I'm working on it for more than 2 weeks xd and without AI rn and I think the code is pretty decent - yay
 -- Edit (4/19/2025) It surprised me that it's a pretty decent project right now :O Just waiting for the hardware and I will make it run locally :D
+
+## How it works right now
+This is primarily for me to later see this and remember how it works
+
+### Communication between Unity frontend and the AI engine
+
+### AI processing of the messages
+
+### Unity displaying the messages in action
+

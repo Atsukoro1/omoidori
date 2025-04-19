@@ -30,7 +30,7 @@ websocketServer.on("connection", (ws) => {
         prompt: messageContent,
         useMemory: true,
         includeMessages: true,
-        useVoiceGeneration: true
+        useVoiceGeneration: false
       });
 
       const socketResponse: SocketResponse = {

@@ -57,6 +57,8 @@ export async function aiProcess({
     }));
   }
 
+  console.log(messages);
+
   const systemPrompt = [
     createSystemPrompt(defaultContext),
     memorySection,
@@ -67,7 +69,7 @@ export async function aiProcess({
     model: openrouter(MODELS.chat_tooling),
     system: systemPrompt,
     temperature: 0.7,
-    messages: [{ ...messages, role: "user", content: prompt }],
+    messages: [...messages, { role: "user", content: prompt }],
   });
 
   logger.info({ response: text }, "The bot responded with");

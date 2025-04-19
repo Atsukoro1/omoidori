@@ -1,4 +1,4 @@
 interface SocketResponse {
-    type: 'message' | 'new_audio' | 'emotion';
+    type: 'message' | 'new_audio';
     data?: string;
 }
