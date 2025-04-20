@@ -13,6 +13,7 @@ import { getContextMessages } from "../utils/getContextMessages";
 import { generateAudio } from "../utils/generateAudio";
 import { socket } from "..";
 import { env } from "./env";
+import { isQuestion, requiresFollowup } from "../utils/messageClassifierHelpers";
 
 interface AiProcessProps {
   prompt: string;
@@ -42,7 +43,7 @@ export async function aiProcess({
   if (useMemory) {
     const memories = await findSimilarEmbeddingTexts(prompt, 5);
     memorySection = memories.length > 0
-      ? `MEMORY CONTEXT:\n${memories.map(m => `- ${m.text}`).join('\n')}`
+      ? `CONVERSATION CONTEXT:\n${memories.map(m => `- ${m.text}`).join('\n')}`
       : '';
   }
 
@@ -54,10 +55,8 @@ export async function aiProcess({
     messages = rawMessages.length === 0 ? [] : rawMessages.map(message => ({
       role: message.role as 'user' | 'assistant',
       content: message.content
-    }));
+    })).reverse();
   }
-
-  console.log(messages);
 
   const systemPrompt = [
     createSystemPrompt(defaultContext),
@@ -84,7 +83,7 @@ export async function aiProcess({
 
   if (useVoiceGeneration) {
     await generateAudio(text);
-    
+
     const socketResponse: SocketResponse = {
       type: 'new_audio',
       data: `http://localhost:${env.HTTP_SERVER_PORT}/audio/latest.mp3`

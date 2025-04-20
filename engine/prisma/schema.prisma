@@ -20,20 +20,3 @@ model ContextSummary {
   summary   String
   createdAt DateTime @default(now())
 }
-
-model Reminder {
-  id        String   @id @default(uuid())
-  content   String
-  dueAt     DateTime
-  createdAt DateTime @default(now())
-  status    String   @default("pending") // pending/completed/failed
-  retries   Int      @default(0)
-}
-
-model Note {
-  id        String   @id @default(uuid())
-  content   String
-  tags      String[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}

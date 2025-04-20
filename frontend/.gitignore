@@ -1,11 +1,11 @@
 # Unity
-[Ll]ibrary/
-  [Tt]emp/
-  [Oo]bj/
-  [Bb]uild/
-  [Bb]uilds/
-  [Ll]ogs/
-  [Mm]emoryCaptures/
+Library/
+  Temp/
+  Obj/
+  Build/
+  Builds/
+  Logs/
+  MemoryCaptures/
 
   # VS/MD
   *.csproj
