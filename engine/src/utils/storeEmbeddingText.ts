@@ -13,7 +13,7 @@ export const storeEmbeddingText = async (text: string) => {
   if (requiresFollowup) tags.push("[FOLLOWUP]");
   const embeddingText = `${text} ${tags.join(" ")}`.trim();
 
-  logger.info("Storing vector message from user with classification:", { text, embeddingText });
+  logger.info({ text, embeddingText }, "Storing vector message from user with classification:");
 
   const embedding = await getEmbedding(embeddingText);
   

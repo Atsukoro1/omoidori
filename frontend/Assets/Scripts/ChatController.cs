@@ -228,8 +228,7 @@ public class ChatController : MonoBehaviour
                 audioSource.Play();
                 Debug.Log("Playing downloaded audio");
 
-                string rawMessage = lastResponseMessage;
-                StartCoroutine(ProcessEmotionMarkers(rawMessage));
+                StartCoroutine(ProcessEmotionMarkers(lastResponseMessage));
                 StartCoroutine(ReturnToDefaultAfterAudio());
             }
             else
@@ -266,6 +265,13 @@ public class ChatController : MonoBehaviour
     private System.Collections.Generic.List<EmotionMarker> ParseEmotionMarkers(string text)
     {
         var markers = new System.Collections.Generic.List<EmotionMarker>();
+
+        if (string.IsNullOrEmpty(text))
+        {
+            Debug.LogWarning("Tried to parse emotion markers from empty text");
+            return markers;
+        }
+
         int currentIndex = 0;
 
         while (currentIndex < text.Length)

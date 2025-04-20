@@ -1,5 +1,6 @@
 import { generateText } from "ai";
 import { openrouter } from "../lib/openrouter";
+import { MODELS } from "../consts/models";
 
 export async function classifyMessage(text: string): Promise<{
   isQuestion: boolean;
@@ -7,7 +8,7 @@ export async function classifyMessage(text: string): Promise<{
   requiresFollowup: boolean;
 }> {
   const { text: classification } = await generateText({
-    model: openrouter("mistralai/mistral-7b-instruct"),
+    model: openrouter(MODELS.classifier),
     temperature: 0,
     maxTokens: 50,
     messages: [{

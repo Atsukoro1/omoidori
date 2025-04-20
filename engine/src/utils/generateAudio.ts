@@ -20,7 +20,6 @@ export const generateAudio = async (content: string): Promise<string> => {
 
         const filePath = path.join(dataDir, 'latest.mp3');
         
-        // make a place for a new file
         if (await fs.exists(filePath)) {
             await fs.rm(filePath);
         }

@@ -13,7 +13,6 @@ import { getContextMessages } from "../utils/getContextMessages";
 import { generateAudio } from "../utils/generateAudio";
 import { socket } from "..";
 import { env } from "./env";
-import { isQuestion, requiresFollowup } from "../utils/messageClassifierHelpers";
 
 interface AiProcessProps {
   prompt: string;
