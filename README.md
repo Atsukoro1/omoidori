@@ -1,17 +1,19 @@
-![Omoidori banner](./engine/assets/header_image.png "Omoidori banner")</br>
 # Project OMOIDORI (思い 取り)
 Virtual AI assistant through Discord
 
-TODOs in short time:
-- Caching of some things in order to save money on prooompting :3
-- Rabbit MQ instead of cron set to minute to deliver perfectly timed messages
-- Voice recognition (maybe mood recognition and responding in the same matter)
-- Use of my own finetuned locally run models
+## Showcase
+Small showcase of how Omoidori works
+![Showcase](./engine/assets/showcase.png "Showcase of the chat with omoidori")</br>
 
 ## How it works right now
 This is primarily for me to later see this and remember how it works
 
-### Communication between Unity frontend and the AI engine
+### Structure of the whole thing
+The whole thing consists of tho parts
+1. AI engine - this project, currently written in Typescript
+2. Unity frontend - The whole "game" coded in C# displaying all the data coming from the engine (messages, emotions, voice, etc...)
+
+### Communication between Unity and Engine
 Those two programs communicate over websocket consisting being structured as this
 ```json
 {
@@ -34,6 +36,3 @@ Textual model includes emotions in angle brackets (<>) to specify emotions. Exam
 
 #### Creating voice messages
 Assistant also makes/generates a voice recording of the message (voice tone is determined by the emotions mentioned in previous paragraph - Emotions in chat messages). This recording is then saved in data directory of this project.
-
-### Unity displaying the messages in action
-

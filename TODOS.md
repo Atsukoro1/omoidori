@@ -1,0 +1,3 @@
+- [] Caching of some things in order to save money on prooompting :3
+- [] Voice recognition (maybe mood recognition and responding in the same matter) - Use whisper (base)
+- [] Use of my own finetuned locally run models
