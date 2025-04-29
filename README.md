@@ -1,6 +1,9 @@
 # Project OMOIDORI (思い 取り)
 Virtual AI assistant
 
+## Notice
+The frontend for this project is not public because some of the assets I used are paid and I do not want to mess with git in my Unity project and exclude/include stuff, if you want the frontend just ask me on any platform
+
 ## Showcase
 Small showcase of how Omoidori works
 ![Showcase](./engine/assets/showcase.png "Showcase of the chat with omoidori")</br>
