@@ -1,5 +1,5 @@
 # Project OMOIDORI (思い 取り)
-Virtual AI assistant through Discord
+Virtual AI assistant
 
 ## Showcase
 Small showcase of how Omoidori works
